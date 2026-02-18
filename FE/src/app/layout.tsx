@@ -1,40 +1,46 @@
 import type { Metadata } from 'next'
-import { DM_Mono, Geist } from 'next/font/google'
+import { Inter, JetBrains_Mono } from 'next/font/google'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from '@/components/ui/sonner'
 import './globals.css'
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  weight: '400',
-  subsets: ['latin']
+
+const inter = Inter({
+    subsets: ['latin'],
+    variable: '--font-sans',
+    display: 'swap'
 })
 
-const dmMono = DM_Mono({
-  subsets: ['latin'],
-  variable: '--font-dm-mono',
-  weight: '400'
+const jetbrainsMono = JetBrains_Mono({
+    subsets: ['latin'],
+    variable: '--font-mono',
+    display: 'swap'
 })
 
 export const metadata: Metadata = {
-  title: 'Agent UI',
-  description:
-    'A modern chat interface for AI agents built with Next.js, Tailwind CSS, and TypeScript. This template provides a ready-to-use UI for interacting with Agno agents.'
+    title: 'Faceless Video Factory',
+    description:
+        'AI-powered pipeline that researches trends, writes scripts, generates videos, voiceovers, and thumbnails — all automatically.'
 }
 
 export default function RootLayout({
-  children
+    children
 }: Readonly<{
-  children: React.ReactNode
+    children: React.ReactNode
 }>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${dmMono.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <NuqsAdapter>{children}</NuqsAdapter>
-          <Toaster />
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+    return (
+        <html lang="en" data-theme="facelessly" suppressHydrationWarning>
+            <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased font-sans`}>
+                <ThemeProvider
+                    attribute="data-theme"
+                    defaultTheme="facelessly"
+                    themes={['facelessly', 'facelessly-light']}
+                    enableSystem={false}
+                >
+                    <NuqsAdapter>{children}</NuqsAdapter>
+                    <Toaster />
+                </ThemeProvider>
+            </body>
+        </html>
+    )
 }

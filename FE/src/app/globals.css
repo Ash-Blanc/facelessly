@@ -3,26 +3,85 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --color-border-default: 255, 255, 255, 0.2;
-    --scrollbar-width: 0.1rem;
+  body {
+    @apply bg-base-100 text-base-content;
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
   }
 
-  body {
-    @apply bg-background text-secondary;
+  /* Smooth transitions when switching themes */
+  *,
+  *::before,
+  *::after {
+    transition-property: background-color, border-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
   }
 }
 
+/* ─── Animation Utilities ─────────────────────────────────── */
+@layer utilities {
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-xl;
+  }
+
+  .fade-in {
+    animation: fadeIn 0.4s ease-out both;
+  }
+
+  .slide-up {
+    animation: slideUp 0.5s ease-out both;
+  }
+
+  .scale-in {
+    animation: scaleIn 0.3s ease-out both;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: var(--scrollbar-width);
+  width: 0.35rem;
 }
 
 ::-webkit-scrollbar-thumb {
-  --tw-border-opacity: 1;
-  @apply bg-border;
-  border-color: rgba(255, 255, 255, var(--tw-border-opacity));
-  border-radius: 9999px;
-  border-width: 1px;
+  @apply bg-base-300 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: oklch(0.7 0.15 25 / 0.4);
 }
 
 ::-webkit-scrollbar-track {
