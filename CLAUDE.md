@@ -31,7 +31,10 @@ bun validate         # Run lint + format + typecheck
 ```bash
 cd BE
 uv sync               # Install dependencies
-uv run src/faceless/main.py   # Start server (http://localhost:8000)
+docker-compose up -d redis  # Start Redis
+uv run src/faceless/main.py   # Start API server (http://localhost:8000)
+# In a separate terminal:
+uv run celery -A faceless.worker worker --loglevel=info --beat  # Start Worker + Beat
 ```
 
 Backend runs on port 8000 with FastAPI Swagger docs at `/docs`.

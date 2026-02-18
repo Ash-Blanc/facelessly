@@ -46,14 +46,19 @@ app.add_middleware(
 async def startup():
     """Initialize database and start workflow on startup."""
     await init_db()
-    # Start the daily workflow in the background
-    await daily_workflow.start()
+    
+    # Start the daily workflow in the background ONLY if enabled
+    # In production, we use Celery Beat instead.
+    if os.getenv("ENABLE_BACKGROUND_WORKFLOW", "false").lower() == "true":
+        logger.info("Starting in-process daily workflow (Legacy Mode)")
+        await daily_workflow.start()
 
 
 @app.on_event("shutdown")
 async def shutdown():
     """Stop workflow on shutdown."""
-    await daily_workflow.stop()
+    if os.getenv("ENABLE_BACKGROUND_WORKFLOW", "false").lower() == "true":
+        await daily_workflow.stop()
 
 
 # =========================================
@@ -108,6 +113,22 @@ async def auth_callback(code: str, state: str):
         return RedirectResponse("/dashboard?error=Failed to get channel data")
     except Exception as e:
         return RedirectResponse(f"/dashboard?error={str(e)}")
+
+
+# =========================================
+# Credits & User routes
+# =========================================
+
+@app.get("/credits/{user_id}")
+async def get_user_credits(user_id: str):
+    """Get pending credits for a user."""
+    async with get_db() as db:
+        async with db.execute("SELECT credits, tier FROM users WHERE id = ?", (user_id,)) as cursor:
+            row = await cursor.fetchone()
+            if row:
+                return dict(row)
+            # Return default for new/unknown users
+            return {"credits": 0, "tier": "free"}
 
 
 # =========================================

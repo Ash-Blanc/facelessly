@@ -66,59 +66,44 @@ class DailyVideoWorkflow:
 
     # ─── Pipeline Processing ────────────────────────────────────────
 
-    async def _process_pipelines(self):
-        """Check for pipelines that are due and run them."""
+    async def get_due_pipelines(self):
+        """Get all pipelines that are due for a run."""
         now = datetime.now()
-
         async with get_db() as db:
-            # Check pipelines table first
             async with db.execute(
                 """SELECT * FROM pipelines
                    WHERE enabled = 1
                    AND (next_run_at IS NULL OR next_run_at <= ?)""",
                 (now.isoformat(),),
             ) as cursor:
-                pipelines = await cursor.fetchall()
+                return await cursor.fetchall()
 
-            for pipeline in pipelines:
-                p = dict(pipeline)
-                try:
-                    await self._run_pipeline(p)
+    async def _process_pipelines(self):
+        """Check for pipelines that are due and run them."""
+        # LEGACY: This runs in-process. For production, use Celery tasks.
+        pipelines = await self.get_due_pipelines()
+        
+        for pipeline in pipelines:
+            p = dict(pipeline)
+            try:
+                await self._run_pipeline(p)
+                await self._update_pipeline_run_time(p)
 
-                    # Update timing
-                    next_run = self._calculate_next_run(p)
-                    await db.execute(
-                        """UPDATE pipelines SET last_run_at = ?, next_run_at = ?,
-                           updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
-                        (now.isoformat(), next_run.isoformat(), p["id"]),
-                    )
-                    logger.info(f"Pipeline {p['id']} completed. Next run: {next_run}")
+            except Exception as e:
+                logger.error(f"Failed pipeline {p['id']}: {e}")
 
-                except Exception as e:
-                    logger.error(f"Failed pipeline {p['id']}: {e}")
-
-            # Also check legacy schedules table
-            async with db.execute(
-                """SELECT * FROM schedules
-                   WHERE enabled = 1
-                   AND (next_run_at IS NULL OR next_run_at <= ?)""",
-                (now.isoformat(),),
-            ) as cursor:
-                schedules = await cursor.fetchall()
-
-            for schedule in schedules:
-                s = dict(schedule)
-                try:
-                    await self._run_legacy_schedule(s)
-
-                    next_run = now + timedelta(days=1)
-                    await db.execute(
-                        """UPDATE schedules SET last_run_at = ?, next_run_at = ?,
-                           updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
-                        (now.isoformat(), next_run.isoformat(), s["id"]),
-                    )
-                except Exception as e:
-                    logger.error(f"Failed schedule {s['id']}: {e}")
+    async def _update_pipeline_run_time(self, pipeline: dict):
+        """Update the last_run_at and next_run_at for a pipeline."""
+        now = datetime.now()
+        next_run = self._calculate_next_run(pipeline)
+        
+        async with get_db() as db:
+            await db.execute(
+                """UPDATE pipelines SET last_run_at = ?, next_run_at = ?,
+                   updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
+                (now.isoformat(), next_run.isoformat(), pipeline["id"]),
+            )
+        logger.info(f"Pipeline {pipeline['id']} scheduled for next run: {next_run}")
 
     async def _run_pipeline(self, pipeline: dict):
         """Run a single pipeline: generate content → create video → queue posts."""

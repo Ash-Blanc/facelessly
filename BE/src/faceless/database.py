@@ -25,8 +25,20 @@ async def init_db():
                 token_expires_at DATETIME,
                 tier TEXT DEFAULT 'free',
                 timezone TEXT DEFAULT 'UTC',
+                credits INTEGER DEFAULT 10,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS transactions (
+                id TEXT PRIMARY KEY,
+                user_id TEXT NOT NULL,
+                amount INTEGER NOT NULL,
+                type TEXT NOT NULL, -- 'credit' or 'debit'
+                description TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         """)
 
