@@ -17,10 +17,13 @@ import { truncateText } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const ENDPOINT_PLACEHOLDER = 'NO ENDPOINT ADDED'
+
 const SidebarHeader = () => (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2.5">
         <Icon type="agno" size="xs" />
-        <span className="text-xs font-medium uppercase text-base-content">Agent UI</span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/50">
+            Agent UI
+        </span>
     </div>
 )
 
@@ -35,15 +38,24 @@ const NewChatButton = ({
         onClick={onClick}
         disabled={disabled}
         size="lg"
-        className="h-9 w-full rounded-xl bg-primary text-xs font-medium text-primary-content hover:brightness-110"
+        className="h-9 w-full rounded-xl bg-primary text-xs font-semibold text-primary-content shadow-glow-sm transition-all duration-300 hover:shadow-glow-md hover:brightness-110"
     >
         <Icon type="plus-icon" size="xs" className="text-primary-content" />
-        <span className="uppercase">New Chat</span>
+        <span className="uppercase tracking-wider">New Chat</span>
     </Button>
 )
 
+const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+    <div className="flex items-center gap-2">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-base-content/30">
+            {children}
+        </span>
+        <div className="flex-1 h-px bg-white/[0.05]" />
+    </div>
+)
+
 const ModelDisplay = ({ model }: { model: string }) => (
-    <div className="flex h-9 w-full items-center gap-3 rounded-xl border border-base-300 bg-base-200 p-3 text-xs font-medium uppercase text-base-content/60">
+    <div className="flex h-9 w-full items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-xs font-medium uppercase text-base-content/50">
         {(() => {
             const icon = getProviderIcon(model)
             return icon ? <Icon type={icon} className="shrink-0" size="xs" /> : null
@@ -76,7 +88,7 @@ const Endpoint = () => {
     }, [selectedEndpoint])
 
     const getStatusColor = (isActive: boolean) =>
-        isActive ? 'bg-success' : 'bg-error'
+        isActive ? 'bg-success shadow-[0_0_6px_rgba(34,197,94,0.5)]' : 'bg-error shadow-[0_0_6px_rgba(239,68,68,0.4)]'
 
     const handleSave = async () => {
         if (!isValidUrl(endpointValue)) {
@@ -101,11 +113,8 @@ const Endpoint = () => {
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            handleSave()
-        } else if (e.key === 'Escape') {
-            handleCancel()
-        }
+        if (e.key === 'Enter') handleSave()
+        else if (e.key === 'Escape') handleCancel()
     }
 
     const handleRefresh = async () => {
@@ -116,7 +125,7 @@ const Endpoint = () => {
 
     return (
         <div className="flex flex-col items-start gap-2">
-            <div className="text-xs font-medium uppercase text-base-content">AgentOS</div>
+            <SectionLabel>AgentOS</SectionLabel>
             {isEditing ? (
                 <div className="flex w-full items-center gap-1">
                     <input
@@ -124,14 +133,14 @@ const Endpoint = () => {
                         value={endpointValue}
                         onChange={(e) => setEndpointValue(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        className="flex h-9 w-full items-center text-ellipsis rounded-xl border border-base-300 bg-base-200 p-3 text-xs font-medium text-base-content/60 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                        className="flex h-9 w-full items-center text-ellipsis rounded-xl border border-primary/30 bg-white/[0.04] p-3 text-xs font-medium text-base-content/70 focus:outline-none focus:ring-2 focus:ring-primary/30"
                         autoFocus
                     />
                     <Button
                         variant="ghost"
                         size="icon"
                         onClick={handleSave}
-                        className="hover:cursor-pointer hover:bg-transparent"
+                        className="hover:cursor-pointer hover:bg-white/5"
                     >
                         <Icon type="save" size="xs" />
                     </Button>
@@ -139,7 +148,7 @@ const Endpoint = () => {
             ) : (
                 <div className="flex w-full items-center gap-1">
                     <motion.div
-                        className="relative flex h-9 w-full cursor-pointer items-center justify-between rounded-xl border border-base-300 bg-base-200 p-3 uppercase"
+                        className="relative flex h-9 w-full cursor-pointer items-center justify-between rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 uppercase transition-colors duration-200 hover:border-primary/20 hover:bg-white/[0.05]"
                         onMouseEnter={() => setIsHovering(true)}
                         onMouseLeave={() => setIsHovering(false)}
                         onClick={() => setIsEditing(true)}
@@ -153,10 +162,10 @@ const Endpoint = () => {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
+                                    transition={{ duration: 0.15 }}
                                 >
-                                    <p className="flex items-center gap-2 whitespace-nowrap text-xs font-medium text-primary-content">
-                                        <Icon type="edit" size="xxs" /> EDIT AGENTOS
+                                    <p className="flex items-center gap-2 whitespace-nowrap text-xs font-medium text-primary">
+                                        <Icon type="edit" size="xxs" /> Edit Endpoint
                                     </p>
                                 </motion.div>
                             ) : (
@@ -166,16 +175,15 @@ const Endpoint = () => {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
-                                    transition={{ duration: 0.2 }}
+                                    transition={{ duration: 0.15 }}
                                 >
-                                    <p className="text-xs font-medium text-base-content/60">
+                                    <p className="text-xs font-medium text-base-content/40">
                                         {isMounted
-                                            ? truncateText(selectedEndpoint, 21) ||
-                                            ENDPOINT_PLACEHOLDER
+                                            ? truncateText(selectedEndpoint, 21) || ENDPOINT_PLACEHOLDER
                                             : 'http://localhost:7777'}
                                     </p>
                                     <div
-                                        className={`size-2 shrink-0 rounded-full ${getStatusColor(isEndpointActive)}`}
+                                        className={`size-1.5 shrink-0 rounded-full ${getStatusColor(isEndpointActive)}`}
                                     />
                                 </motion.div>
                             )}
@@ -185,7 +193,7 @@ const Endpoint = () => {
                         variant="ghost"
                         size="icon"
                         onClick={handleRefresh}
-                        className="hover:cursor-pointer hover:bg-transparent"
+                        className="hover:cursor-pointer hover:bg-white/5"
                     >
                         <motion.div
                             key={isRotating ? 'rotating' : 'idle'}
@@ -225,7 +233,6 @@ const Sidebar = ({
 
     useEffect(() => {
         setIsMounted(true)
-
         if (hydrated) initialize()
     }, [selectedEndpoint, initialize, hydrated, mode])
 
@@ -236,14 +243,14 @@ const Sidebar = ({
 
     return (
         <motion.aside
-            className="relative flex h-screen shrink-0 grow-0 flex-col overflow-hidden px-2 py-3 font-mono"
+            className="relative flex h-screen shrink-0 grow-0 flex-col overflow-hidden border-r border-white/[0.05] bg-base-200/50 px-2 py-3 font-mono backdrop-blur-xl"
             initial={{ width: '16rem' }}
             animate={{ width: isCollapsed ? '2.5rem' : '16rem' }}
             transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
             <motion.button
                 onClick={() => setIsCollapsed(!isCollapsed)}
-                className="absolute right-2 top-2 z-10 p-1"
+                className="absolute right-2 top-2 z-10 rounded-lg p-1.5 text-base-content/30 transition-colors hover:bg-white/5 hover:text-base-content/60"
                 aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
                 type="button"
                 whileTap={{ scale: 0.95 }}
@@ -251,17 +258,15 @@ const Sidebar = ({
                 <Icon
                     type="sheet"
                     size="xs"
-                    className={`transform ${isCollapsed ? 'rotate-180' : 'rotate-0'}`}
+                    className={`transform transition-transform duration-300 ${isCollapsed ? 'rotate-180' : 'rotate-0'}`}
                 />
             </motion.button>
             <motion.div
                 className="w-60 space-y-5"
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: isCollapsed ? 0 : 1, x: isCollapsed ? -20 : 0 }}
-                transition={{ duration: 0.3, ease: 'easeInOut' }}
-                style={{
-                    pointerEvents: isCollapsed ? 'none' : 'auto'
-                }}
+                transition={{ duration: 0.25, ease: 'easeInOut' }}
+                style={{ pointerEvents: isCollapsed ? 'none' : 'auto' }}
             >
                 <SidebarHeader />
                 <NewChatButton
@@ -278,11 +283,9 @@ const Sidebar = ({
                                     className="flex w-full flex-col items-start gap-2"
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.5, ease: 'easeInOut' }}
+                                    transition={{ duration: 0.4, ease: 'easeInOut' }}
                                 >
-                                    <div className="text-xs font-medium uppercase text-base-content">
-                                        Mode
-                                    </div>
+                                    <SectionLabel>Mode</SectionLabel>
                                     {isEndpointLoading ? (
                                         <div className="flex w-full flex-col gap-2">
                                             {Array.from({ length: 3 }).map((_, index) => (

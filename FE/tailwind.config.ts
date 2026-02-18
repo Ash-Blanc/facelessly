@@ -19,7 +19,30 @@ export default {
             },
             borderRadius: {
                 xl: '10px'
-            }
+            },
+            boxShadow: {
+                'glow-sm': '0 0 12px rgba(255, 64, 23, 0.2), 0 0 30px rgba(255, 64, 23, 0.08)',
+                'glow-md': '0 0 20px rgba(255, 64, 23, 0.3), 0 0 60px rgba(255, 64, 23, 0.1)',
+                'glow-lg': '0 0 40px rgba(255, 64, 23, 0.4), 0 0 100px rgba(255, 64, 23, 0.15)',
+                'glow-xl': '0 0 60px rgba(255, 64, 23, 0.5), 0 0 140px rgba(255, 64, 23, 0.2)',
+                'inner-glow': 'inset 0 1px 0 rgba(255,255,255,0.08)',
+                'card': '0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(255,255,255,0.04)',
+                'card-hover': '0 8px 40px rgba(0,0,0,0.5), 0 0 20px rgba(255,64,23,0.15)',
+            },
+            backgroundImage: {
+                'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+                'gradient-brand': 'linear-gradient(135deg, #FF4017 0%, #FF8C42 50%, #FF4017 100%)',
+                'gradient-brand-subtle': 'linear-gradient(135deg, rgba(255,64,23,0.15) 0%, rgba(255,140,66,0.08) 100%)',
+            },
+            animation: {
+                'float': 'float 6s ease-in-out infinite',
+                'float-slow': 'float 9s ease-in-out infinite',
+                'shimmer': 'shimmer 3s ease-in-out infinite',
+                'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                'orb': 'orbPulse 8s ease-in-out infinite',
+                'fade-in-up': 'fadeInUp 0.6s ease-out both',
+            },
         }
     },
     plugins: [tailwindcssAnimate, daisyui],
@@ -35,10 +58,10 @@ export default {
                     'accent-content': '#0A0F14',
                     'neutral': '#1E1E22',
                     'neutral-content': '#D4D4D8',
-                    'base-100': '#111113',
-                    'base-200': '#1A1A1E',
-                    'base-300': '#27272A',
-                    'base-content': '#F5F5F5',
+                    'base-100': '#0D0D0F',
+                    'base-200': '#161618',
+                    'base-300': '#222226',
+                    'base-content': '#F0F0F0',
                     'info': '#3B82F6',
                     'info-content': '#DBEAFE',
                     'success': '#22C55E',
