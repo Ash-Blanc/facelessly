@@ -1,7 +1,9 @@
 # YouTube Channel Owner Frontend Design
 
 **Date:** 2026-02-18
-**Status:** Approved
+**Status:** ✅ Partially Implemented (2026-02-18)
+
+> Core backend and frontend pages implemented. Kanban drag-drop, asset preview panel, script editor, and export features are pending.
 
 ## Overview
 
@@ -157,7 +159,7 @@ Users who skip YouTube connection:
 - Projects stored locally (localStorage)
 - Prompt to connect YouTube for cloud sync
 
-## Database Schema (SQLite)
+## Database Schema (SQLite) — Updated
 
 ```sql
 -- Users table
@@ -173,11 +175,13 @@ CREATE TABLE users (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Projects table (Kanban cards)
+-- Projects table (Kanban cards) — added niche, style columns
 CREATE TABLE projects (
     id TEXT PRIMARY KEY,
-    user_id TEXT REFERENCES users(id),
+    user_id TEXT,
     title TEXT NOT NULL,
+    niche TEXT,           -- NEW: niche preset ID
+    style TEXT,           -- NEW: style preset ID
     status TEXT DEFAULT 'backlog',
     position INTEGER,
     selected_trend_id TEXT,
@@ -206,6 +210,21 @@ CREATE TABLE assets (
     prompt TEXT,
     metadata TEXT,
     status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- NEW: Schedules table for daily auto-posting
+CREATE TABLE schedules (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    niche TEXT NOT NULL,
+    style TEXT NOT NULL,
+    platforms TEXT DEFAULT 'youtube',
+    frequency TEXT DEFAULT 'daily',
+    enabled INTEGER DEFAULT 1,
+    last_run_at DATETIME,
+    next_run_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -280,11 +299,15 @@ CREATE TABLE assets (
 
 ## Success Criteria
 
-1. User can connect YouTube account via OAuth
-2. Kanban board displays projects with drag-drop
-3. Step-by-step workflow: trends → script → media → review → ready
-4. All assets previewable in slide-out panel
-5. Scripts editable with full text control
-6. Individual assets can be regenerated
-7. Export to CapCut/Canva/download ZIP works
-8. Guest mode works without YouTube connection
+- [x] User can connect YouTube account via OAuth
+- [x] Projects CRUD with niche/style support
+- [x] Database schema with users, projects, trends, assets, schedules
+- [x] Auth routes + callback implemented
+- [x] Frontend dashboard page with project listing
+- [ ] Kanban board drag-drop (pending)
+- [ ] Step-by-step workflow: trends → script → media → review → ready (pending)
+- [ ] Slide-out asset preview panel (pending)
+- [ ] Scripts editable with full text control (pending)
+- [ ] Individual assets can be regenerated (pending)
+- [ ] Export to CapCut/Canva/download ZIP (pending)
+- [x] Guest mode works without YouTube connection

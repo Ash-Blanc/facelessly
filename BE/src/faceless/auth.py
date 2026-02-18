@@ -7,7 +7,7 @@ from typing import Any
 
 import httpx
 
-from .database import get_db
+from faceless.database import get_db
 
 AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
