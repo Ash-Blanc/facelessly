@@ -2,6 +2,7 @@
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { Play, Volume2, Image } from 'lucide-react'
 
 import type { Project } from '@/types/os'
 import { cn } from '@/lib/utils'
@@ -26,7 +27,6 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
         transition
     }
 
-    // Get asset status indicators
     const assets = project.assets || {}
     const hasVideo = !!assets.video
     const hasAudio = !!assets.audio
@@ -40,35 +40,45 @@ export function ProjectCard({ project, onClick }: ProjectCardProps) {
             {...listeners}
             onClick={onClick}
             className={cn(
-                'cursor-grab rounded-lg border border-base-300 bg-base-100 p-3 shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5',
-                isDragging && 'opacity-50 shadow-lg scale-105'
+                'group cursor-grab rounded-xl border border-white/[0.07] bg-white/[0.03] p-3.5 shadow-card',
+                'transition-all duration-300',
+                'hover:border-primary/25 hover:bg-white/[0.05] hover:shadow-card-hover hover:-translate-y-0.5',
+                isDragging && 'opacity-50 shadow-glow-md scale-105 cursor-grabbing'
             )}
         >
             {/* Title */}
-            <h4 className="mb-2 line-clamp-2 font-medium text-base-content">{project.title}</h4>
+            <h4 className="mb-3 line-clamp-2 text-sm font-medium leading-snug text-base-content">
+                {project.title}
+            </h4>
 
-            {/* Status badges */}
-            <div className="flex flex-wrap gap-1">
-                {hasVideo && (
-                    <span className="badge badge-success badge-sm gap-1">
-                        Video
-                    </span>
-                )}
-                {hasAudio && (
-                    <span className="badge badge-info badge-sm gap-1">
-                        Audio
-                    </span>
-                )}
-                {hasThumbnail && (
-                    <span className="badge badge-secondary badge-sm gap-1">
-                        Thumbnail
-                    </span>
-                )}
-            </div>
+            {/* Asset badges */}
+            {(hasVideo || hasAudio || hasThumbnail) && (
+                <div className="flex flex-wrap gap-1.5">
+                    {hasVideo && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-[10px] font-medium text-success">
+                            <Play className="h-2.5 w-2.5" />
+                            Video
+                        </span>
+                    )}
+                    {hasAudio && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-info/10 px-2 py-0.5 text-[10px] font-medium text-info">
+                            <Volume2 className="h-2.5 w-2.5" />
+                            Audio
+                        </span>
+                    )}
+                    {hasThumbnail && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-secondary/10 px-2 py-0.5 text-[10px] font-medium text-secondary">
+                            <Image className="h-2.5 w-2.5" />
+                            Thumb
+                        </span>
+                    )}
+                </div>
+            )}
 
-            {/* Selected trend indicator */}
+            {/* Trend indicator */}
             {project.selected_trend_id && (
-                <div className="mt-2 text-xs text-base-content/50">
+                <div className="mt-2.5 flex items-center gap-1.5 text-[10px] text-base-content/40">
+                    <span className="h-1 w-1 rounded-full bg-warning" />
                     Trend selected
                 </div>
             )}

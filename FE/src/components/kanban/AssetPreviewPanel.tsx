@@ -8,10 +8,10 @@ import { Button } from '@/components/ui/button'
 import type { Asset, Project } from '@/types/os'
 
 const statusBadgeClass: Record<string, string> = {
-    ready: 'badge badge-success badge-sm',
-    pending: 'badge badge-warning badge-sm',
-    error: 'badge badge-error badge-sm',
-    processing: 'badge badge-info badge-sm'
+    ready: 'bg-success/10 text-success',
+    pending: 'bg-warning/10 text-warning',
+    error: 'bg-error/10 text-error',
+    processing: 'bg-info/10 text-info'
 }
 
 export function AssetPreviewPanel() {
@@ -31,9 +31,7 @@ export function AssetPreviewPanel() {
 
     const assets = project.assets || {}
 
-    const handleClose = () => {
-        setSelectedProjectId(null)
-    }
+    const handleClose = () => setSelectedProjectId(null)
 
     const handleDownload = (url: string, filename: string) => {
         const link = document.createElement('a')
@@ -43,70 +41,78 @@ export function AssetPreviewPanel() {
     }
 
     return (
-        <div className="fixed right-0 top-0 z-50 h-full w-96 border-l border-base-300 bg-base-100 shadow-2xl slide-up">
+        <div className="fixed right-0 top-0 z-50 h-full w-96 border-l border-white/[0.07] bg-base-100/90 shadow-2xl backdrop-blur-2xl slide-up">
+            {/* Top accent bar */}
+            <div className="h-0.5 w-full bg-gradient-to-r from-primary/60 via-primary to-primary/60" />
+
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-base-300 p-4">
+            <div className="flex items-center justify-between border-b border-white/[0.06] p-4">
                 <div>
                     <h2 className="font-semibold text-base-content">{project.title}</h2>
-                    <p className="text-sm capitalize text-base-content/50">
+                    <p className="mt-0.5 text-xs capitalize text-base-content/40">
                         {project.status}
                     </p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={handleClose}>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={handleClose}
+                    className="h-8 w-8 rounded-lg hover:bg-white/5"
+                >
                     <X className="h-4 w-4" />
                 </Button>
             </div>
 
             {/* Content */}
-            <div className="space-y-4 overflow-y-auto p-4">
-                {/* Video Asset */}
+            <div className="space-y-3 overflow-y-auto p-4">
                 {assets.video && (
                     <AssetSection
                         asset={assets.video}
                         type="video"
                         title="Generated Video"
-                        icon={<Play className="h-4 w-4" />}
+                        icon={<Play className="h-3.5 w-3.5" />}
                         onDownload={(url) => handleDownload(url, `${project.title}-video.mp4`)}
                     />
                 )}
 
-                {/* Audio Asset */}
                 {assets.audio && (
                     <AssetSection
                         asset={assets.audio}
                         type="audio"
                         title="Voiceover"
-                        icon={<Volume2 className="h-4 w-4" />}
+                        icon={<Volume2 className="h-3.5 w-3.5" />}
                         onDownload={(url) => handleDownload(url, `${project.title}-audio.mp3`)}
                     />
                 )}
 
-                {/* Thumbnail Asset */}
                 {assets.thumbnail && (
                     <AssetSection
                         asset={assets.thumbnail}
                         type="image"
                         title="Thumbnail"
-                        icon={<Image className="h-4 w-4" />}
+                        icon={<Image className="h-3.5 w-3.5" />}
                         onDownload={(url) => handleDownload(url, `${project.title}-thumbnail.jpg`)}
                     />
                 )}
 
-                {/* No assets yet */}
                 {!assets.video && !assets.audio && !assets.thumbnail && (
-                    <div className="py-8 text-center text-base-content/50">
-                        <p>No assets generated yet</p>
-                        <p className="mt-2 text-sm">
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-base-300/50">
+                            <Play className="h-5 w-5 text-base-content/30" />
+                        </div>
+                        <p className="text-sm font-medium text-base-content/50">No assets yet</p>
+                        <p className="mt-1 text-xs text-base-content/30">
                             Run the agent to generate video, audio, and thumbnail
                         </p>
                     </div>
                 )}
 
-                {/* Script Section */}
                 {assets.script && (
-                    <div className="rounded-lg border border-base-300 bg-base-200 p-4">
-                        <h3 className="mb-2 font-medium text-base-content">Script</h3>
-                        <pre className="whitespace-pre-wrap text-sm text-base-content/70 font-mono">{assets.script.prompt}</pre>
+                    <div className="rounded-xl border border-white/[0.06] bg-base-200/60 p-4">
+                        <h3 className="mb-2 text-xs font-semibold uppercase tracking-widest text-base-content/40">Script</h3>
+                        <pre className="whitespace-pre-wrap font-mono text-xs leading-relaxed text-base-content/70">
+                            {assets.script.prompt}
+                        </pre>
                     </div>
                 )}
             </div>
@@ -123,29 +129,28 @@ interface AssetSectionProps {
 }
 
 function AssetSection({ asset, type, title, icon, onDownload }: AssetSectionProps) {
-    const [isPlaying, setIsPlaying] = useState(false)
-
     return (
-        <div className="rounded-lg border border-base-300 overflow-hidden">
-            <div className="flex items-center justify-between border-b border-base-300 bg-base-200 p-3">
-                <div className="flex items-center gap-2 text-base-content">
+        <div className="overflow-hidden rounded-xl border border-white/[0.06] bg-base-200/40">
+            {/* Section header */}
+            <div className="flex items-center justify-between border-b border-white/[0.05] bg-base-200/60 px-3 py-2.5">
+                <div className="flex items-center gap-2 text-base-content/70">
                     {icon}
-                    <span className="font-medium">{title}</span>
+                    <span className="text-xs font-medium">{title}</span>
                 </div>
-                <span className={statusBadgeClass[asset.status] || 'badge badge-sm'}>
+                <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${statusBadgeClass[asset.status] || 'bg-base-300/50 text-base-content/40'
+                        }`}
+                >
                     {asset.status}
                 </span>
             </div>
 
             <div className="p-3">
-                {/* Preview */}
                 {type === 'video' && asset.url && (
                     <video
                         src={asset.url}
                         controls
                         className="mb-3 w-full rounded-lg"
-                        onPlay={() => setIsPlaying(true)}
-                        onPause={() => setIsPlaying(false)}
                     />
                 )}
 
@@ -161,32 +166,32 @@ function AssetSection({ asset, type, title, icon, onDownload }: AssetSectionProp
                     />
                 )}
 
-                {/* Actions */}
                 {asset.url && (
                     <div className="flex gap-2">
                         <Button
                             size="sm"
                             variant="outline"
                             onClick={() => onDownload(asset.url!)}
+                            className="h-7 rounded-lg border-white/10 bg-white/5 text-xs hover:bg-white/10"
                         >
-                            <Download className="mr-2 h-4 w-4" />
+                            <Download className="mr-1.5 h-3 w-3" />
                             Download
                         </Button>
                         <Button
                             size="sm"
                             variant="outline"
                             onClick={() => window.open(asset.url!, '_blank')}
+                            className="h-7 w-7 rounded-lg border-white/10 bg-white/5 p-0 hover:bg-white/10"
                         >
-                            <ExternalLink className="h-4 w-4" />
+                            <ExternalLink className="h-3 w-3" />
                         </Button>
                     </div>
                 )}
 
-                {/* Prompt */}
                 {asset.prompt && (
-                    <div className="mt-3">
-                        <p className="text-xs text-base-content/50">Prompt:</p>
-                        <p className="text-sm text-base-content/80">{asset.prompt}</p>
+                    <div className="mt-3 border-t border-white/[0.05] pt-3">
+                        <p className="mb-1 text-[10px] uppercase tracking-widest text-base-content/30">Prompt</p>
+                        <p className="text-xs leading-relaxed text-base-content/60">{asset.prompt}</p>
                     </div>
                 )}
             </div>

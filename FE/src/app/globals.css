@@ -18,6 +18,74 @@
   }
 }
 
+/* ─── Glassmorphism ───────────────────────────────────────── */
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-xl bg-white/[0.04] border border-white/[0.08];
+  }
+
+  .glass-sm {
+    @apply backdrop-blur-md bg-white/[0.03] border border-white/[0.06];
+  }
+
+  .glass-strong {
+    @apply backdrop-blur-2xl bg-white/[0.06] border border-white/[0.12];
+  }
+
+  /* Glow shadows */
+  .glow-primary {
+    box-shadow: 0 0 20px rgba(255, 64, 23, 0.3), 0 0 60px rgba(255, 64, 23, 0.1);
+  }
+
+  .glow-primary-sm {
+    box-shadow: 0 0 12px rgba(255, 64, 23, 0.2), 0 0 30px rgba(255, 64, 23, 0.08);
+  }
+
+  .glow-primary-lg {
+    box-shadow: 0 0 40px rgba(255, 64, 23, 0.4), 0 0 100px rgba(255, 64, 23, 0.15);
+  }
+
+  /* Gradient text */
+  .text-gradient {
+    background: linear-gradient(135deg, #FF4017 0%, #FF8C42 50%, #FF4017 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-white {
+    background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.7) 50%, #ffffff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Grid background */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .bg-grid-sm {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+
+  /* Noise texture overlay */
+  .noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    border-radius: inherit;
+  }
+}
+
 /* ─── Animation Utilities ─────────────────────────────────── */
 @layer utilities {
   .hover-lift {
@@ -28,18 +96,55 @@
   }
 
   .fade-in {
-    animation: fadeIn 0.4s ease-out both;
+    animation: fadeIn 0.5s ease-out both;
+  }
+
+  .fade-in-slow {
+    animation: fadeIn 0.8s ease-out both;
   }
 
   .slide-up {
-    animation: slideUp 0.5s ease-out both;
+    animation: slideUp 0.6s ease-out both;
+  }
+
+  .slide-up-delay {
+    animation: slideUp 0.6s ease-out 0.2s both;
   }
 
   .scale-in {
     animation: scaleIn 0.3s ease-out both;
   }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float 9s ease-in-out infinite;
+  }
+
+  .animate-float-delay {
+    animation: float 7s ease-in-out 2s infinite;
+  }
+
+  .animate-shimmer {
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-orb {
+    animation: orbPulse 8s ease-in-out infinite;
+  }
+
+  .animate-orb-delay {
+    animation: orbPulse 10s ease-in-out 3s infinite;
+  }
 }
 
+/* ─── Keyframes ───────────────────────────────────────────── */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -52,7 +157,7 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(1rem);
+    transform: translateY(1.5rem);
   }
   to {
     opacity: 1;
@@ -71,6 +176,46 @@
   }
 }
 
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes orbPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.6;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* ─── Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 0.35rem;
@@ -81,7 +226,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: oklch(0.7 0.15 25 / 0.4);
+  background-color: rgba(255, 64, 23, 0.3);
 }
 
 ::-webkit-scrollbar-track {
