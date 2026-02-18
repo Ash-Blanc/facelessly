@@ -1,0 +1,25 @@
+# Faceless Video Factory
+
+# Dependencies
+BE/.venv/
+FE/node_modules/
+
+# Build outputs
+BE/build/
+FE/.next/
+FE/out/
+
+# Environment files
+.env
+.env.local
+FE/.env.local
+
+# Database files
+*.db
+
+# OS files
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
