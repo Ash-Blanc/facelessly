@@ -3,10 +3,15 @@
 import uuid
 from typing import Any
 
-from .database import get_db
+from faceless.database import get_db
 
 
-async def create_project(user_id: str, title: str) -> dict[str, Any]:
+async def create_project(
+    user_id: str,
+    title: str,
+    niche_id: str | None = None,
+    style_id: str | None = None,
+) -> dict[str, Any]:
     """Create a new project in backlog."""
     project_id = f"proj_{uuid.uuid4().hex[:12]}"
 
@@ -21,13 +26,20 @@ async def create_project(user_id: str, title: str) -> dict[str, Any]:
 
         await db.execute(
             """
-            INSERT INTO projects (id, user_id, title, status, position)
-            VALUES (?, ?, ?, 'backlog', ?)
+            INSERT INTO projects (id, user_id, title, niche, style, status, position)
+            VALUES (?, ?, ?, ?, ?, 'backlog', ?)
             """,
-            (project_id, user_id, title, position),
+            (project_id, user_id, title, niche_id, style_id, position),
         )
 
-    return {"id": project_id, "title": title, "status": "backlog", "position": position}
+    return {
+        "id": project_id,
+        "title": title,
+        "niche": niche_id,
+        "style": style_id,
+        "status": "backlog",
+        "position": position,
+    }
 
 
 async def get_projects(user_id: str) -> list[dict[str, Any]]:

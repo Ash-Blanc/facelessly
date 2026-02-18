@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Video, Zap, Target, BarChart3 } from 'lucide-react'
+import { ArrowRight, Video, Zap, Target, BarChart3, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function Home() {
@@ -11,14 +11,20 @@ export default function Home() {
       <nav className="flex items-center justify-between border-b px-6 py-4">
         <div className="flex items-center gap-2">
           <Video className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">Faceless Video Factory</span>
+          <span className="text-xl font-bold">Faceless Factory</span>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/dashboard">
             <Button variant="ghost">Dashboard</Button>
           </Link>
           <Link href="/chat">
-            <Button>Launch App</Button>
+            <Button variant="ghost">Chat</Button>
+          </Link>
+          <Link href="/generate">
+            <Button>
+              <Sparkles className="mr-2 h-4 w-4" />
+              Create Video
+            </Button>
           </Link>
         </div>
       </nav>
@@ -26,16 +32,16 @@ export default function Home() {
       {/* Hero */}
       <section className="px-6 py-24 text-center">
         <h1 className="mb-6 text-5xl font-bold tracking-tight">
-          Create Viral Shorts on Autopilot
+          Create Faceless Videos<br />Automatically with AI 🚀
         </h1>
         <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
-          AI-powered pipeline that researches trends, writes scripts, generates videos,
-          voiceovers, and thumbnails - all automatically.
+          Type your niche, choose your style, connect your channels — and FacelessFactory generates
+          & auto-posts videos <strong>every single day</strong> to every platform.
         </p>
         <div className="flex justify-center gap-4">
-          <Link href="/dashboard">
-            <Button size="lg">
-              Get Started <ArrowRight className="ml-2 h-4 w-4" />
+          <Link href="/generate">
+            <Button size="lg" className="gap-2 px-8 py-6 text-lg">
+              Get Started <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
           <Link href="/chat">
@@ -50,18 +56,18 @@ export default function Home() {
       <section className="grid gap-8 px-6 py-16 md:grid-cols-3">
         <FeatureCard
           icon={<Zap className="h-8 w-8" />}
-          title="AI Research"
-          description="Automatically discovers trending topics and analyzes what makes content go viral"
+          title="1. Pick Your Niche"
+          description="Choose from luxury, space, Reddit stories, finance, horror, or top-10. We tailor everything for you."
         />
         <FeatureCard
           icon={<Target className="h-8 w-8" />}
-          title="Auto Generation"
-          description="Generates scripts, videos, voiceovers, and thumbnails with one click"
+          title="2. Choose Your Style"
+          description="Cinematic dark, bright energetic, minimal, retro, or neon futuristic — your videos look incredible."
         />
         <FeatureCard
           icon={<BarChart3 className="h-8 w-8" />}
-          title="YouTube Integration"
-          description="Connect your channel and publish directly to maximize reach"
+          title="3. Connect & Automate"
+          description="Link YouTube, TikTok, and Instagram. We generate and auto-post daily — put your growth on autopilot."
         />
       </section>
 
@@ -96,11 +102,11 @@ function FeatureCard({
 
 function Steps() {
   const steps = [
-    { num: '01', title: 'Connect YouTube', desc: 'Link your channel securely with OAuth' },
-    { num: '02', title: 'AI Finds Trends', desc: 'Research engine discovers viral opportunities' },
-    { num: '03', title: 'Script Generation', desc: 'Large language model writes engaging scripts' },
-    { num: '04', title: 'Media Generation', desc: 'Create videos, voiceovers & thumbnails' },
-    { num: '05', title: 'Review & Export', desc: 'Preview, edit, and download for your editor' }
+    { num: '01', title: 'Type Your Niche', desc: 'Pick a content category that matches your audience.' },
+    { num: '02', title: 'Choose Style', desc: 'Select a visual aesthetic — cinematic, bright, retro & more.' },
+    { num: '03', title: 'Connect Channels', desc: 'Link YouTube, TikTok, Instagram with one click.' },
+    { num: '04', title: 'AI Generates', desc: 'Research, script, video, voiceover & thumbnail — all automatic.' },
+    { num: '05', title: 'Auto-Post Daily', desc: 'Videos posted to every platform, every single day.' }
   ]
 
   return (

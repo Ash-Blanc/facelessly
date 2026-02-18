@@ -1,7 +1,7 @@
 # Faceless Video Factory: Mistral + Pollinations Integration Design
 
 **Date:** 2026-02-17
-**Status:** Approved
+**Status:** ✅ Implemented (2026-02-18)
 
 ## Overview
 
@@ -150,24 +150,35 @@ dependencies = [
 ]
 ```
 
-## Files to Modify
+## Files Modified
 
-| File | Changes |
-|------|---------|
-| `BE/src/faceless/agents.py` | Replace OpenAI with Mistral, add 3 new agents, update imports |
-| `BE/src/faceless/tools.py` | Remove mock tools, add PollinationsTools class |
-| `BE/pyproject.toml` | Update dependencies |
-| `BE/.env.example` | Add new environment variables |
+| File | Changes | Status |
+|------|---------|--------|
+| `BE/src/faceless/agents.py` | Replaced OpenAI with Mistral, added 5 agents, factory function with niche/style | ✅ Done |
+| `BE/src/faceless/tools.py` | Added PollinationsTools class (video/audio/image) | ✅ Done |
+| `BE/src/faceless/config.py` | **[NEW]** Niche presets (6) and style presets (5) | ✅ Done |
+| `BE/pyproject.toml` | Updated dependencies | ✅ Done |
+| `BE/.env.example` | Added new environment variables | ✅ Done |
 
 ## API Endpoints
 
-No changes to API surface. The team still exposes the same AgentOS endpoints:
+AgentOS endpoints (auto-generated):
 - `GET /teams` - Lists FacelessViralFactory team
 - `POST /teams/faceless_viral_factory/runs` - Run the full pipeline with streaming
 
+New custom endpoints added:
+- `GET /niches` - List niche presets
+- `GET /styles` - List style presets
+- `POST /generate` - Run AI pipeline with niche/style config
+- `POST /schedule` - Create/update daily auto-posting schedule
+- `GET /schedule/{user_id}` - Get user's schedule
+- `DELETE /schedule/{user_id}` - Remove schedule
+
 ## Success Criteria
 
-1. Team runs end-to-end: trend → script → video → audio → thumbnail
-2. All outputs are URLs from pollinations.ai or structured markdown
-3. Mistral models handle all reasoning (no OpenAI dependency)
-4. Frontend can stream the full pipeline execution
+- [x] Team runs end-to-end: trend → script → video → audio → thumbnail
+- [x] All outputs are URLs from pollinations.ai or structured markdown
+- [x] Mistral models handle all reasoning (no OpenAI dependency)
+- [x] Frontend can stream the full pipeline execution
+- [x] Niche/style system customizes agent instructions
+- [x] Factory function creates configured teams on demand
