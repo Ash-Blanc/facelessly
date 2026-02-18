@@ -1,123 +1,122 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Video, Zap, Target, BarChart3, Sparkles } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Video, MessageSquare, LayoutDashboard, Sparkles, Mic, Image, TrendingUp, Zap } from 'lucide-react'
+
+const FEATURES = [
+    { icon: TrendingUp, label: 'Research' },
+    { icon: Sparkles, label: 'Script' },
+    { icon: Video, label: 'Video' },
+    { icon: Mic, label: 'Voice' },
+    { icon: Image, label: 'Thumbnail' },
+]
 
 export default function Home() {
     return (
-        <div className="min-h-screen bg-gradient-to-b from-background to-background/80">
-            {/* Navigation */}
-            <nav className="flex items-center justify-between border-b px-6 py-4">
-                <div className="flex items-center gap-2">
-                    <Video className="h-6 w-6 text-primary" />
-                    <span className="text-xl font-bold">Faceless Factory</span>
-                </div>
-                <div className="flex items-center gap-4">
-                    <Link href="/dashboard">
-                        <Button variant="ghost">Dashboard</Button>
-                    </Link>
-                    <Link href="/chat">
-                        <Button variant="ghost">Chat</Button>
-                    </Link>
-                    <Link href="/generate">
-                        <Button>
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            Create Video
-                        </Button>
-                    </Link>
-                </div>
-            </nav>
+        <div className="relative flex h-screen flex-col items-center justify-center overflow-hidden bg-base-100 px-6">
+            {/* Animated background grid */}
+            <div className="absolute inset-0 bg-grid opacity-100" />
 
-            {/* Hero */}
-            <section className="px-6 py-24 text-center">
-                <h1 className="mb-6 text-5xl font-bold tracking-tight">
-                    Create Faceless Videos<br />Automatically with AI 🚀
-                </h1>
-                <p className="mx-auto mb-8 max-w-2xl text-xl text-muted-foreground">
-                    Type your niche, choose your style, connect your channels — and FacelessFactory generates
-                    & auto-posts videos <strong>every single day</strong> to every platform.
+            {/* Radial gradient mask over grid */}
+            <div className="absolute inset-0 bg-gradient-radial from-transparent via-transparent to-base-100 opacity-80" />
+
+            {/* Animated orbs */}
+            <div
+                className="animate-orb pointer-events-none absolute left-1/4 top-1/4 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                style={{
+                    background: 'radial-gradient(circle, rgba(255,64,23,0.18) 0%, rgba(255,64,23,0.05) 50%, transparent 70%)',
+                    filter: 'blur(40px)',
+                }}
+            />
+            <div
+                className="animate-orb-delay pointer-events-none absolute right-1/4 bottom-1/3 h-80 w-80 translate-x-1/2 rounded-full"
+                style={{
+                    background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, rgba(99,102,241,0.04) 50%, transparent 70%)',
+                    filter: 'blur(50px)',
+                }}
+            />
+            <div
+                className="animate-float-slow pointer-events-none absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                style={{
+                    background: 'radial-gradient(circle, rgba(255,64,23,0.06) 0%, transparent 70%)',
+                    filter: 'blur(60px)',
+                }}
+            />
+
+            {/* Content */}
+            <div className="relative z-10 flex flex-col items-center text-center">
+                {/* Badge */}
+                <div
+                    className="fade-in mb-8 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary"
+                    style={{ animationDelay: '0ms' }}
+                >
+                    <Zap className="h-3 w-3" />
+                    AI-Powered Video Creation
+                </div>
+
+                {/* Logo + Headline */}
+                <div className="fade-in mb-6" style={{ animationDelay: '80ms' }}>
+                    <div className="mb-5 flex items-center justify-center gap-3">
+                        <div className="relative">
+                            <div className="absolute inset-0 rounded-xl glow-primary opacity-60 blur-sm" />
+                            <div className="relative flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
+                                <Video className="h-6 w-6 text-primary-content" />
+                            </div>
+                        </div>
+                    </div>
+                    <h1 className="text-5xl font-bold tracking-tight md:text-6xl lg:text-7xl">
+                        <span className="text-gradient">Faceless</span>
+                        <br />
+                        <span className="text-base-content">Video Factory</span>
+                    </h1>
+                </div>
+
+                {/* Tagline */}
+                <p
+                    className="fade-in mb-8 max-w-lg text-lg leading-relaxed text-base-content/50 md:text-xl"
+                    style={{ animationDelay: '160ms' }}
+                >
+                    From trending topic to viral short — fully automated with AI.
                 </p>
-                <div className="flex justify-center gap-4">
-                    <Link href="/generate">
-                        <Button size="lg" className="gap-2 px-8 py-6 text-lg">
-                            Get Started <ArrowRight className="h-5 w-5" />
-                        </Button>
-                    </Link>
+
+                {/* Feature pills */}
+                <div
+                    className="fade-in mb-10 flex flex-wrap items-center justify-center gap-2"
+                    style={{ animationDelay: '240ms' }}
+                >
+                    {FEATURES.map(({ icon: Icon, label }) => (
+                        <span
+                            key={label}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-base-300 bg-base-200/60 px-3 py-1 text-xs font-medium text-base-content/60 backdrop-blur-sm"
+                        >
+                            <Icon className="h-3 w-3 text-primary" />
+                            {label}
+                        </span>
+                    ))}
+                </div>
+
+                {/* CTA Buttons */}
+                <div
+                    className="slide-up flex flex-col items-center gap-3 sm:flex-row"
+                    style={{ animationDelay: '320ms' }}
+                >
                     <Link href="/chat">
-                        <Button size="lg" variant="outline">
-                            Try Chat Interface
-                        </Button>
+                        <button className="btn btn-lg btn-primary relative gap-2 overflow-hidden rounded-xl px-8 font-semibold shadow-glow-md transition-all duration-300 hover:shadow-glow-lg hover:-translate-y-0.5">
+                            <MessageSquare className="h-5 w-5" />
+                            Start Creating
+                        </button>
+                    </Link>
+                    <Link href="/dashboard">
+                        <button className="btn btn-lg gap-2 rounded-xl border border-base-300 bg-base-200/60 text-base-content backdrop-blur-sm transition-all duration-300 hover:border-primary/30 hover:bg-base-200 hover:shadow-glow-sm">
+                            <LayoutDashboard className="h-5 w-5" />
+                            Dashboard
+                        </button>
                     </Link>
                 </div>
-            </section>
+            </div>
 
-            {/* Features */}
-            <section className="grid gap-8 px-6 py-16 md:grid-cols-3">
-                <FeatureCard
-                    icon={<Zap className="h-8 w-8" />}
-                    title="1. Pick Your Niche"
-                    description="Choose from luxury, space, Reddit stories, finance, horror, or top-10. We tailor everything for you."
-                />
-                <FeatureCard
-                    icon={<Target className="h-8 w-8" />}
-                    title="2. Choose Your Style"
-                    description="Cinematic dark, bright energetic, minimal, retro, or neon futuristic — your videos look incredible."
-                />
-                <FeatureCard
-                    icon={<BarChart3 className="h-8 w-8" />}
-                    title="3. Connect & Automate"
-                    description="Link YouTube, TikTok, and Instagram. We generate and auto-post daily — put your growth on autopilot."
-                />
-            </section>
-
-            {/* How it works */}
-            <section className="border-t px-6 py-16">
-                <h2 className="mb-12 text-center text-3xl font-bold">How It Works</h2>
-                <div className="mx-auto max-w-4xl">
-                    <Steps />
-                </div>
-            </section>
-        </div>
-    )
-}
-
-function FeatureCard({
-    icon,
-    title,
-    description
-}: {
-    icon: React.ReactNode
-    title: string
-    description: string
-}) {
-    return (
-        <div className="rounded-lg border bg-card p-6">
-            <div className="mb-4 text-primary">{icon}</div>
-            <h3 className="mb-2 text-xl font-semibold">{title}</h3>
-            <p className="text-muted-foreground">{description}</p>
-        </div>
-    )
-}
-
-function Steps() {
-    const steps = [
-        { num: '01', title: 'Type Your Niche', desc: 'Pick a content category that matches your audience.' },
-        { num: '02', title: 'Choose Style', desc: 'Select a visual aesthetic — cinematic, bright, retro & more.' },
-        { num: '03', title: 'Connect Channels', desc: 'Link YouTube, TikTok, Instagram with one click.' },
-        { num: '04', title: 'AI Generates', desc: 'Research, script, video, voiceover & thumbnail — all automatic.' },
-        { num: '05', title: 'Auto-Post Daily', desc: 'Videos posted to every platform, every single day.' }
-    ]
-
-    return (
-        <div className="grid gap-6 md:grid-cols-5">
-            {steps.map((step) => (
-                <div key={step.num} className="text-center">
-                    <div className="mb-3 text-4xl font-bold text-primary/30">{step.num}</div>
-                    <h3 className="mb-1 font-semibold">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground">{step.desc}</p>
-                </div>
-            ))}
+            {/* Bottom gradient fade */}
+            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-base-100 to-transparent" />
         </div>
     )
 }

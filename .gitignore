@@ -10,8 +10,6 @@ FE/.next/
 FE/out/
 
 # Environment files
-.env
-.env.local
 FE/.env.local
 
 # Database files
@@ -22,4 +20,5 @@ FE/.env.local
 
 # IDE
 .idea/
-.vscode/
+config.bat
+node_modules
