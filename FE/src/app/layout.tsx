@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, JetBrains_Mono } from 'next/font/google'
+import { Inter, Outfit, JetBrains_Mono } from 'next/font/google'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import { ThemeProvider } from 'next-themes'
 import { Toaster } from '@/components/ui/sonner'
@@ -11,6 +11,12 @@ const inter = Inter({
     display: 'swap'
 })
 
+const outfit = Outfit({
+    subsets: ['latin'],
+    variable: '--font-display',
+    display: 'swap'
+})
+
 const jetbrainsMono = JetBrains_Mono({
     subsets: ['latin'],
     variable: '--font-mono',
@@ -18,9 +24,9 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-    title: 'Faceless Video Factory',
+    title: 'Facelessly | AI Faceless Video Generator',
     description:
-        'AI-powered pipeline that researches trends, writes scripts, generates videos, voiceovers, and thumbnails — all automatically.'
+        'Create viral faceless videos on autopilot. The only AI that generates & posts videos for you automatically, even while you sleep.'
 }
 
 export default function RootLayout({
@@ -29,11 +35,11 @@ export default function RootLayout({
     children: React.ReactNode
 }>) {
     return (
-        <html lang="en" data-theme="facelessly" suppressHydrationWarning>
-            <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased font-sans`}>
+        <html lang="en" data-theme="facelessly-light" suppressHydrationWarning>
+            <body className={`${inter.variable} ${outfit.variable} ${jetbrainsMono.variable} antialiased font-sans`}>
                 <ThemeProvider
                     attribute="data-theme"
-                    defaultTheme="facelessly"
+                    defaultTheme="facelessly-light"
                     themes={['facelessly', 'facelessly-light']}
                     enableSystem={false}
                 >

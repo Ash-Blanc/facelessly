@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**FacelessReels** — an autopilot system for generating and auto-posting viral faceless short-form videos (YouTube Shorts, Reels, TikTok). Users pick a niche, choose a style, pick a content template, connect their channels, and the platform auto-generates & auto-posts videos daily via pipelines.
+**Facelessly** — a production SaaS for generating and auto-posting viral faceless short-form videos (YouTube Shorts, Reels, TikTok). Users pick a niche, choose voice/style, connect socials, and the platform auto-generates & auto-posts videos via Celery-powered pipelines.
 
-- **FE/**: Next.js frontend — generation wizard, calendar, chat, dashboard, platform connections
-- **BE/**: Python backend — Agno (AgentOS) agent pipeline, niche/style config, templates, pipelines, posting, scheduling
+- **FE/**: Next.js 15 frontend — generation wizard, calendar, chat, dashboard, platform connections
+- **BE/**: Python backend — 5-agent AI pipeline, Celery task queue, credit system, upload-post.com integration
 
 ## Development Commands
 
@@ -15,24 +15,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 cd FE
-bun install          # Install dependencies
-bun dev              # Start dev server (http://localhost:3000)
-bun build            # Production build
-bun lint             # ESLint check
-bun lint:fix         # Auto-fix lint issues
-bun format           # Prettier check
-bun format:fix       # Auto-format code
-bun typecheck        # TypeScript check
-bun validate         # Run lint + format + typecheck
+npm install          # Install dependencies
+npm run dev          # Start dev server (http://localhost:3000)
+npm run build        # Production build
+npm run lint         # ESLint check
+npm run lint:fix     # Auto-fix lint issues
+npm run typecheck    # TypeScript check
 ```
 
 ### Backend (BE/)
 
 ```bash
 cd BE
-uv sync               # Install dependencies
-docker-compose up -d redis  # Start Redis
-uv run src/faceless/main.py   # Start API server (http://localhost:8000)
+uv sync                         # Install dependencies
+docker-compose up -d redis      # Start Redis
+uv run src/faceless/main.py     # Start API server (http://localhost:8000)
+
 # In a separate terminal:
 uv run celery -A faceless.worker worker --loglevel=info --beat  # Start Worker + Beat
 ```
@@ -50,7 +48,7 @@ FE/src/
 │   ├── page.tsx        # Landing page with CTA → /generate
 │   ├── chat/           # AI agent chat interface
 │   ├── generate/       # 4-step wizard: niche → style → connect → generate
-│   ├── connect/        # Platform connection management (YT, TT, IG)
+│   ├── connect/        # Platform connection management
 │   ├── calendar/       # Content calendar with post statuses
 │   └── dashboard/      # Kanban project board
 ├── components/   # React components (chat/, ui/)
@@ -64,17 +62,19 @@ FE/src/
 
 ```
 BE/src/faceless/
-├── main.py         # FastAPI app, all routes, AgentOS integration, workflow lifecycle
+├── main.py         # FastAPI app, all routes, AgentOS integration
 ├── agents.py       # 5-agent pipeline with niche/style factory
 ├── config.py       # Niche presets (6) and style presets (5)
 ├── templates.py    # Content templates (6 built-in formats)
 ├── tools.py        # PollinationsTools for media generation
-├── posting.py      # Multi-platform PostService with retry logic
-├── auth.py         # YouTube OAuth (TikTok/Instagram scaffolded)
-├── database.py     # SQLite: users, connected_accounts, projects, pipelines, post_jobs, content_jobs
+├── worker.py       # Celery application configuration (Redis broker)
+├── tasks.py        # Celery tasks: generation, posting, credit deduction
+├── posting.py      # upload-post.com integration with retry logic
+├── auth.py         # YouTube OAuth
+├── database.py     # SQLite: users, pipelines, transactions, etc. (10 tables)
 ├── projects.py     # Project/asset CRUD operations
-├── upload.py       # Direct upload functions (legacy, see posting.py)
-└── workflow.py     # Daily auto-generation background scheduler + rolling schedule
+├── upload.py       # Direct upload functions (legacy)
+└── workflow.py     # Pipeline scheduling helpers (get_due_pipelines)
 ```
 
 #### Agent Pipeline (agents.py)
@@ -87,21 +87,30 @@ BE/src/faceless/
 4. **VoiceoverAgent**: Generates TTS audio via Pollinations.ai
 5. **ThumbnailAgent**: Generates thumbnails via Pollinations.ai
 
+#### Task Queue (worker.py + tasks.py)
+
+Celery with Redis handles background processing:
+
+- `check_pipelines_task`: Periodic task (every 5 min via Beat) that finds due pipelines and dispatches generation
+- `generate_video_task`: Runs agent team, checks/deducts credits, creates post job on success
+- `process_posts_task`: Sends pending posts via upload-post.com
+
 #### Content Templates (templates.py)
 
 6 built-in formats: `top5_facts`, `myth_vs_fact`, `tips_for`, `daily_quote`, `story_time`, `did_you_know` — each with structured sections, durations, and example scripts. Templates are tagged to niches.
 
 #### Posting Service (posting.py)
 
-`PostService` manages multi-platform posting:
-- YouTube: functional via Data API v3 (downloads video → uploads)
-- TikTok: scaffolded via Content Posting API
-- Instagram: scaffolded via Graph API
+`PostService` manages multi-platform posting via upload-post.com unified API:
+- Platform auto-mapping (youtube, tiktok, instagram)
+- Poll-based job status tracking
 - Retry logic with exponential backoff (3 retries)
 
-#### Pipelines (via main.py + workflow.py)
+#### Credit System
 
-A Pipeline = niche + style + template + platforms + frequency + timezone + posting times. The `DailyVideoWorkflow` background loop processes due pipelines, runs the agent team, and queues post jobs.
+- Users have `credits` column (deducted per generation) and `tier` (free/pro/scale)
+- `transactions` table logs every credit debit
+- `GET /credits/{user_id}` endpoint exposes balance
 
 ### API Endpoints
 
@@ -120,6 +129,8 @@ A Pipeline = niche + style + template + platforms + frequency + timezone + posti
 - `PATCH /pipelines/{id}` — Update pipeline
 - `DELETE /pipelines/{id}` — Delete pipeline
 
+**Credits:** `GET /credits/{user_id}` — Credit balance and tier
+
 **Post Jobs:**
 - `POST /posts/queue` — Queue video for posting
 - `GET /posts/{user_id}` — List post history
@@ -130,8 +141,6 @@ A Pipeline = niche + style + template + platforms + frequency + timezone + posti
 - `GET /accounts/{user_id}` — List connected platforms
 - `DELETE /accounts/{user_id}/{platform}` — Disconnect platform
 
-**Scheduling (legacy):** `POST /schedule`, `GET /schedule/{user_id}`, `DELETE /schedule/{user_id}`
-
 **Projects:** CRUD at `/projects`, `/projects/{id}/trends`, `/projects/{id}/assets`
 
 **Auth:** `GET /auth/youtube`, `GET /auth/callback`
@@ -141,18 +150,21 @@ A Pipeline = niche + style + template + platforms + frequency + timezone + posti
 **Backend (BE/.env):**
 - `MISTRAL_API_KEY` — Required for Mistral AI models
 - `PARALLEL_API_KEY` — Required for ParallelTools trend research
+- `REDIS_URL` — Redis URL for Celery (default: `redis://localhost:6379/0`)
+- `UPLOAD_POST_API_KEY` — Required for upload-post.com posting
 - `POLLINATIONS_API_KEY` — Optional, for enhanced rate limits
 - `YOUTUBE_CLIENT_ID` / `YOUTUBE_CLIENT_SECRET` / `YOUTUBE_REDIRECT_URI` — YouTube OAuth
 - `PORT` — Server port (default: 8000)
+- `ENABLE_BACKGROUND_WORKFLOW` — Legacy in-process loop (default: false)
 
 **Frontend (FE/.env.local):**
-- `NEXT_PUBLIC_OS_URL` — Backend URL (default: http://localhost:8000)
+- `NEXT_PUBLIC_API_URL` — Backend URL (default: http://localhost:8000)
 
 ## Tech Stack
 
 **Frontend:** Next.js 15, React 18, TypeScript, Tailwind CSS, shadcn/ui, Zustand, Framer Motion, nuqs
-**Backend:** Python 3.13, Agno/AgentOS, FastAPI, uvicorn, Mistral AI, Pollinations.ai, ParallelTools, YouTubeTools, aiosqlite, httpx
-**Package Managers:** bun (FE), uv (BE)
+**Backend:** Python 3.13, Agno/AgentOS, FastAPI, Celery, Redis, Mistral AI, Pollinations.ai, httpx, aiosqlite
+**Package Managers:** npm (FE), uv (BE)
 
 ## User Flow
 

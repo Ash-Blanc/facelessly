@@ -69,6 +69,9 @@ interface Store {
   // Project management
   currentUser: User | null
   setCurrentUser: (user: User | null) => void
+  credits: number
+  tier: string
+  setCredits: (credits: number, tier?: string) => void
   projects: Project[]
   setProjects: (projects: Project[]) => void
   selectedProjectId: string | null
@@ -77,11 +80,14 @@ interface Store {
   setIsProjectsLoading: (loading: boolean) => void
 
   // Project actions
-  createProject: (title: string) => Promise<Project | null>
+  loadProjects: () => Promise<void>
+  createProject: (title: string, extra?: Record<string, string>) => Promise<Project | null>
   updateProject: (id: string, updates: Partial<Project>) => Promise<void>
   deleteProject: (id: string) => Promise<void>
   moveProject: (id: string, status: ProjectStatus, position: number) => Promise<void>
 }
+
+const getUserId = (user: User | null) => user?.id || 'anonymous'
 
 export const useStore = create<Store>()(
   persist(
@@ -139,6 +145,10 @@ export const useStore = create<Store>()(
       // Project management
       currentUser: null,
       setCurrentUser: (user) => set(() => ({ currentUser: user })),
+      credits: 0,
+      tier: 'free',
+      setCredits: (credits, tier) =>
+        set((s) => ({ credits, tier: tier ?? s.tier })),
       projects: [],
       setProjects: (projects) => set(() => ({ projects })),
       selectedProjectId: null,
@@ -147,19 +157,24 @@ export const useStore = create<Store>()(
       setIsProjectsLoading: (loading) => set(() => ({ isProjectsLoading: loading })),
 
       // Project actions
-      createProject: async (title: string) => {
-        const user = get().currentUser
-        if (!user) return null
-        const project = await createProjectAPI(user.id, title)
+      loadProjects: async () => {
+        const userId = getUserId(get().currentUser)
+        set({ isProjectsLoading: true })
+        const projects = await getProjectsAPI(userId)
+        set({ projects, isProjectsLoading: false })
+      },
+
+      createProject: async (title: string, extra?: Record<string, string>) => {
+        const userId = getUserId(get().currentUser)
+        const project = await createProjectAPI(userId, title, extra)
         if (project) {
           set((state) => ({ projects: [...state.projects, project] }))
         }
         return project
       },
       updateProject: async (id: string, updates: Partial<Project>) => {
-        const user = get().currentUser
-        if (!user) return
-        const updated = await updateProjectAPI(id, { ...updates, user_id: user.id })
+        const userId = getUserId(get().currentUser)
+        const updated = await updateProjectAPI(id, { ...updates, user_id: userId })
         if (updated) {
           set((state) => ({
             projects: state.projects.map((p) => (p.id === id ? updated : p))
@@ -167,9 +182,8 @@ export const useStore = create<Store>()(
         }
       },
       deleteProject: async (id: string) => {
-        const user = get().currentUser
-        if (!user) return
-        const success = await deleteProjectAPI(id, user.id)
+        const userId = getUserId(get().currentUser)
+        const success = await deleteProjectAPI(id, userId)
         if (success) {
           set((state) => ({
             projects: state.projects.filter((p) => p.id !== id)
@@ -177,9 +191,8 @@ export const useStore = create<Store>()(
         }
       },
       moveProject: async (id: string, status: ProjectStatus, position: number) => {
-        const user = get().currentUser
-        if (!user) return
-        const updated = await updateProjectAPI(id, { status, position, user_id: user.id })
+        const userId = getUserId(get().currentUser)
+        const updated = await updateProjectAPI(id, { status, position, user_id: userId })
         if (updated) {
           set((state) => ({
             projects: state.projects.map((p) => (p.id === id ? updated : p))
@@ -188,10 +201,13 @@ export const useStore = create<Store>()(
       }
     }),
     {
-      name: 'endpoint-storage',
+      name: 'facelessly-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
-        selectedEndpoint: state.selectedEndpoint
+        selectedEndpoint: state.selectedEndpoint,
+        currentUser: state.currentUser,
+        credits: state.credits,
+        tier: state.tier,
       }),
       onRehydrateStorage: () => (state) => {
         state?.setHydrated?.()

@@ -1,13 +1,24 @@
-# Faceless Video Factory — Backend
+# Facelessly — Backend
 
-Agno/AgentOS-powered backend for autopilot faceless video generation and multi-platform posting.
+AI-powered faceless video generation and auto-posting SaaS backend. Built with **FastAPI**, **Celery**, **Redis**, and an **Agno** multi-agent pipeline.
 
 ## Quick Start
 
 ```bash
-uv sync                          # Install dependencies
-cp .env.example .env             # Fill in API keys
-uv run src/faceless/main.py      # Start server (auto-starts daily workflow)
+# 1. Install dependencies
+uv sync
+
+# 2. Configure environment
+cp .env.example .env    # Fill in API keys
+
+# 3. Start Redis (requires Docker)
+docker-compose up -d redis
+
+# 4. Start API server
+uv run src/faceless/main.py
+
+# 5. Start Celery worker + scheduler (separate terminal)
+uv run celery -A faceless.worker worker --loglevel=info --beat
 ```
 
 - **API Docs:** http://localhost:8000/docs
@@ -15,7 +26,7 @@ uv run src/faceless/main.py      # Start server (auto-starts daily workflow)
 
 ## Architecture
 
-### Agent Pipeline
+### AI Agent Pipeline
 
 A 5-agent collaborative team generates complete video packages:
 
@@ -27,11 +38,21 @@ A 5-agent collaborative team generates complete video packages:
 | 4 | VoiceoverAgent | mistral-small | PollinationsTools (audio) | TTS audio URL |
 | 5 | ThumbnailAgent | mistral-small | PollinationsTools (image) | Thumbnail URLs |
 
+### Task Queue (Celery + Redis)
+
+Background tasks handle heavy processing outside the API server:
+
+| Task | Trigger | What It Does |
+|------|---------|-------------|
+| `check_pipelines_task` | Celery Beat (5 min) | Finds due pipelines, dispatches generation |
+| `generate_video_task` | Pipeline check | Runs agent team, deducts credits, queues post |
+| `process_posts_task` | Celery Beat (5 min) | Sends ready posts via upload-post.com |
+
 ### Niche/Style System
 
 `create_faceless_team(niche_id, style_id)` tailors all agent instructions.
 
-**Niches:** luxury, space, reddit, finance, top10, horror
+**Niches:** luxury, space, reddit, finance, top10, horror  
 **Styles:** cinematic_dark, bright_energetic, minimal_clean, retro_vintage, neon_futuristic
 
 ### Content Templates
@@ -47,12 +68,13 @@ A 5-agent collaborative team generates complete video packages:
 | `config.py` | Niche & style presets |
 | `templates.py` | Content templates with LLM prompt generation |
 | `tools.py` | PollinationsTools (video/audio/image) |
-| `posting.py` | Multi-platform PostService with retry logic |
+| `posting.py` | upload-post.com integration with retry logic |
+| `worker.py` | Celery application configuration |
+| `tasks.py` | Celery task definitions (generation, posting, credits) |
 | `auth.py` | YouTube OAuth |
-| `database.py` | SQLite schema (8 tables) |
+| `database.py` | SQLite schema (10 tables including credits & transactions) |
 | `projects.py` | Project/asset CRUD |
-| `upload.py` | Direct upload functions (legacy) |
-| `workflow.py` | Pipeline-based daily scheduler |
+| `workflow.py` | Pipeline scheduling helpers |
 
 ## API Endpoints
 
@@ -60,20 +82,23 @@ A 5-agent collaborative team generates complete video packages:
 - `GET /niches` — List niche presets
 - `GET /styles` — List style presets
 - `GET /templates?niche=...` — List content templates
-- `GET /templates/{id}` — Template detail with example script
+- `GET /templates/{id}` — Template detail
 
 ### Generation
 - `POST /generate` — `{ niche, style, template?, user_id }`
 
 ### Pipelines
 - `GET /pipelines/{user_id}` — List pipelines
-- `POST /pipelines` — Create pipeline with full schedule config
+- `POST /pipelines` — Create pipeline with schedule config
 - `PATCH /pipelines/{id}` — Update
-- `DELETE /pipelines/{id}` — Delete with content jobs
+- `DELETE /pipelines/{id}` — Delete
+
+### Credits
+- `GET /credits/{user_id}` — User credit balance and tier
 
 ### Posting
 - `POST /posts/queue` — Queue video for posting
-- `GET /posts/{user_id}` — Post history with statuses
+- `GET /posts/{user_id}` — Post history
 
 ### Calendar
 - `GET /calendar/{user_id}?days=30` — Posts + content jobs by date
@@ -88,11 +113,11 @@ A 5-agent collaborative team generates complete video packages:
 
 ### Auth
 - `GET /auth/youtube` → OAuth redirect
-- `GET /auth/callback` → Token exchange + redirect to frontend
+- `GET /auth/callback` → Token exchange
 
 ## Database Schema
 
-8 tables: `users`, `connected_accounts`, `projects`, `trends`, `assets`, `pipelines`, `content_jobs`, `post_jobs`
+10 tables: `users` (with credits & tier), `connected_accounts`, `projects`, `trends`, `assets`, `pipelines`, `content_jobs`, `post_jobs`, `transactions`
 
 ## Environment Variables
 
@@ -101,12 +126,23 @@ A 5-agent collaborative team generates complete video packages:
 MISTRAL_API_KEY=your_mistral_key
 PARALLEL_API_KEY=your_parallel_key
 
+# Celery / Redis
+REDIS_URL=redis://localhost:6379/0
+
+# Posting
+UPLOAD_POST_API_KEY=your_upload_post_key
+
 # Optional
 POLLINATIONS_API_KEY=optional_enhanced_rate_limits
 PORT=8000
+ENABLE_BACKGROUND_WORKFLOW=false
 
 # YouTube OAuth
 YOUTUBE_CLIENT_ID=your_google_client_id
 YOUTUBE_CLIENT_SECRET=your_google_client_secret
 YOUTUBE_REDIRECT_URI=http://localhost:8000/auth/callback
 ```
+
+## License
+
+MIT

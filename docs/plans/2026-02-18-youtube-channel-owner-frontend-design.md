@@ -3,7 +3,7 @@
 **Date:** 2026-02-18
 **Status:** ✅ Partially Implemented (2026-02-18)
 
-> Core backend and frontend pages implemented. Kanban drag-drop, asset preview panel, script editor, and export features are pending.
+> Core backend and frontend pages implemented. Backend upgraded with Celery/Redis task queue, upload-post.com posting, and credit system. Kanban drag-drop, asset preview panel, script editor, and export features are pending.
 
 ## Overview
 

@@ -1,14 +1,14 @@
 # Niche/Style System, Scheduling & Upload Integration
 
-**Date:** 2026-02-18
-**Status:** ✅ Implemented
+**Date:** 2026-02-18  
+**Status:** ✅ Implemented (upgraded with Celery + upload-post.com)
 
 ## Overview
 
-Extended the Faceless Video Factory with three major capabilities:
+Extended Facelessly with three major capabilities:
 1. **Niche & Style selection** — configurable presets that tailor the entire AI pipeline
-2. **Daily auto-posting scheduler** — background workflow that generates and posts videos on a schedule
-3. **Multi-platform uploads** — YouTube upload functional, TikTok/Instagram scaffolded
+2. **Daily auto-posting scheduler** — Celery + Redis background tasks replacing in-process workflow loop
+3. **Multi-platform uploads** — unified via upload-post.com API (YouTube, TikTok, Instagram)
 
 ## Components
 
@@ -43,20 +43,22 @@ Extended the Faceless Video Factory with three major capabilities:
 - Style-matching visual and audio generation prompts
 - Graceful fallback when API keys aren't set
 
-### 3. Scheduling System (`workflow.py` + `database.py`)
+### 3. Scheduling System (Celery + Redis)
 
-- `DailyVideoWorkflow` runs as a background task
-- Checks for due schedules every 5 minutes
-- Runs the AI pipeline and creates project entries
-- Updates `last_run_at` / `next_run_at` timestamps
+- **Upgraded** from in-process `DailyVideoWorkflow` loop to Celery task queue
+- `worker.py` — Celery app config with Redis broker/backend
+- `tasks.py` — `check_pipelines_task` (Beat scheduled every 5 min), `generate_video_task`, `process_posts_task`
+- Credit check and deduction integrated into generation task
 
-### 4. Upload Module (`upload.py`)
+### 4. Posting Module (`posting.py`)
 
 | Platform | Status | Method |
 |----------|--------|--------|
-| YouTube | ✅ Functional | YouTube Data API v3 (`videos.insert`) |
-| TikTok | 🔲 Scaffolded | Awaiting API key integration |
-| Instagram | 🔲 Scaffolded | Awaiting API key integration |
+| YouTube | ✅ Functional | via upload-post.com API |
+| TikTok | ✅ Functional | via upload-post.com API |
+| Instagram | ✅ Functional | via upload-post.com API |
+
+> **Note:** Replaced per-platform adapters with unified upload-post.com integration.
 
 ### 5. Frontend Pages
 
@@ -64,6 +66,8 @@ Extended the Faceless Video Factory with three major capabilities:
 |------|-------|---------|
 | Landing | `/` | Hero + CTA → `/generate` |
 | Generate Wizard | `/generate` | 4-step flow: niche → style → connect → generate |
+| Calendar | `/calendar` | Content calendar with status chips |
+| Dashboard | `/dashboard` | Kanban project board |
 | Connections | `/connect` | Platform management + active schedule |
 | Chat | `/chat` | Direct AI agent interaction |
 
@@ -73,24 +77,28 @@ Extended the Faceless Video Factory with three major capabilities:
 |------|--------|
 | `BE/src/faceless/config.py` | ✅ NEW |
 | `BE/src/faceless/agents.py` | ✅ Updated (factory functions) |
-| `BE/src/faceless/database.py` | ✅ Updated (schedules table) |
-| `BE/src/faceless/main.py` | ✅ Updated (6 new endpoints) |
-| `BE/src/faceless/upload.py` | ✅ NEW |
-| `BE/src/faceless/workflow.py` | ✅ NEW |
+| `BE/src/faceless/database.py` | ✅ Updated (credits, transactions, 10 tables) |
+| `BE/src/faceless/main.py` | ✅ Updated (Celery integration + credits endpoint) |
+| `BE/src/faceless/worker.py` | ✅ NEW (Celery app config) |
+| `BE/src/faceless/tasks.py` | ✅ NEW (Celery tasks with credit logic) |
+| `BE/src/faceless/posting.py` | ✅ Updated (upload-post.com) |
+| `BE/src/faceless/workflow.py` | ✅ Updated (scheduling helpers) |
 | `BE/src/faceless/projects.py` | ✅ Updated |
 | `BE/src/faceless/auth.py` | ✅ Updated |
+| `BE/docker-compose.yml` | ✅ NEW (Redis) |
 | `FE/src/app/page.tsx` | ✅ Updated |
 | `FE/src/app/generate/page.tsx` | ✅ NEW |
 | `FE/src/app/connect/page.tsx` | ✅ NEW |
+| `FE/src/app/calendar/page.tsx` | ✅ NEW |
 | `FE/src/app/chat/page.tsx` | ✅ Fixed |
 | `FE/src/api/routes.ts` | ✅ Updated |
 | `FE/src/store.ts` | ✅ Updated |
 
 ## Remaining Work
 
-- [ ] TikTok Content Posting API integration
-- [ ] Instagram Graph API integration
-- [ ] Video download from Pollinations before upload
-- [ ] End-to-end test with all API keys configured
+- [ ] Stripe billing integration
+- [ ] Credit top-up UI and monthly refresh
+- [ ] Script preview before generation (quality gate)
 - [ ] Kanban drag-drop in dashboard
 - [ ] Asset preview/editing panels
+- [ ] Premium video generation providers

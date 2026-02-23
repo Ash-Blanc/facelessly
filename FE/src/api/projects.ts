@@ -4,35 +4,15 @@ import { APIRoutes } from './routes'
 
 import type { Project, Trend, Asset, User } from '@/types/os'
 
-// Get the backend URL
-const getBackendUrl = (): string => {
-  return process.env.NEXT_PUBLIC_OS_URL || 'http://localhost:8000'
-}
-
 // Auth API
-export const authYouTube = async (): Promise<string> => {
-  const response = await fetch(APIRoutes.AuthYouTube(), {
-    method: 'GET',
-    redirect: 'follow'
-  })
-  return response.url
-}
-
-export const getAuthCallback = async (code: string, state: string): Promise<{ user_id: string; channel_name: string } | { error: string }> => {
-  const url = new URL(APIRoutes.AuthCallback())
-  url.searchParams.set('code', code)
-  url.searchParams.set('state', state)
-
-  const response = await fetch(url.toString(), {
-    method: 'GET'
-  })
-
-  if (!response.ok) {
-    const error = await response.json()
-    return { error: error.error || 'Authentication failed' }
+export const getUserAPI = async (userId: string): Promise<User | null> => {
+  try {
+    const response = await fetch(APIRoutes.GetUser(userId))
+    if (!response.ok) return null
+    return response.json()
+  } catch {
+    return null
   }
-
-  return response.json()
 }
 
 // Projects API
@@ -58,12 +38,12 @@ export const getProjectsAPI = async (userId: string): Promise<Project[]> => {
   }
 }
 
-export const createProjectAPI = async (userId: string, title: string): Promise<Project | null> => {
+export const createProjectAPI = async (userId: string, title: string, extra?: Record<string, string>): Promise<Project | null> => {
   try {
     const response = await fetch(APIRoutes.CreateProject(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, title })
+      body: JSON.stringify({ user_id: userId, title, ...extra })
     })
 
     if (!response.ok) {
@@ -145,6 +125,87 @@ export const deleteProjectAPI = async (projectId: string, userId: string): Promi
   }
 }
 
+// Generate API (step-by-step workflow)
+export const generateTrendsAPI = async (projectId: string, userId: string): Promise<Project | null> => {
+  try {
+    const response = await fetch(APIRoutes.GenerateTrends(projectId), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId })
+    })
+    if (!response.ok) {
+      const err = await response.json()
+      toast.error(err.error || 'Failed to generate trends')
+      return null
+    }
+    return response.json()
+  } catch {
+    toast.error('Error generating trends')
+    return null
+  }
+}
+
+export const generateScriptAPI = async (projectId: string, userId: string, prompt?: string): Promise<Project | null> => {
+  try {
+    const response = await fetch(APIRoutes.GenerateScript(projectId), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, ...(prompt ? { prompt } : {}) })
+    })
+    if (!response.ok) {
+      const err = await response.json()
+      toast.error(err.error || 'Failed to generate script')
+      return null
+    }
+    return response.json()
+  } catch {
+    toast.error('Error generating script')
+    return null
+  }
+}
+
+export const generateMediaAPI = async (
+  projectId: string,
+  userId: string,
+  types?: string[]
+): Promise<Project | null> => {
+  try {
+    const response = await fetch(APIRoutes.GenerateMedia(projectId), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId, types: types ?? ['video', 'audio', 'thumbnail'] })
+    })
+    if (!response.ok) {
+      const err = await response.json()
+      toast.error(err.error || 'Failed to generate media')
+      return null
+    }
+    return response.json()
+  } catch {
+    toast.error('Error generating media')
+    return null
+  }
+}
+
+export const exportProjectAPI = async (projectId: string, userId: string): Promise<void> => {
+  try {
+    const url = new URL(APIRoutes.ExportProject(projectId))
+    url.searchParams.set('user_id', userId)
+    const response = await fetch(url.toString())
+    if (!response.ok) {
+      toast.error('Export failed')
+      return
+    }
+    const blob = await response.blob()
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `${projectId}_export.zip`
+    link.click()
+  } catch {
+    toast.error('Error exporting project')
+  }
+}
+
 // Trends API
 export const addTrendAPI = async (projectId: string, trendData: Omit<Trend, 'id' | 'project_id'>): Promise<Trend | null> => {
   try {
@@ -186,6 +247,17 @@ export const addAssetAPI = async (
     return response.json()
   } catch {
     toast.error('Error adding asset')
+    return null
+  }
+}
+
+// Credits API
+export const getCreditsAPI = async (userId: string): Promise<{ credits: number; tier: string } | null> => {
+  try {
+    const response = await fetch(APIRoutes.GetCredits(userId))
+    if (!response.ok) return null
+    return response.json()
+  } catch {
     return null
   }
 }

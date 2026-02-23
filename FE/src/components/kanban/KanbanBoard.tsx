@@ -19,13 +19,15 @@ import { toast } from 'sonner'
 import { useStore } from '@/store'
 import type { Project, ProjectStatus } from '@/types/os'
 import { KanbanColumn } from './KanbanColumn'
+import { ProjectCard } from './ProjectCard'
 
-const COLUMNS: { id: ProjectStatus; title: string }[] = [
-  { id: 'backlog', title: 'Backlog' },
-  { id: 'trending', title: 'Trending' },
-  { id: 'scripting', title: 'Scripting' },
-  { id: 'production', title: 'Production' },
-  { id: 'completed', title: 'Completed' }
+// These match the backend ProjectStatus values exactly
+const COLUMNS: { id: ProjectStatus; title: string; emoji: string }[] = [
+  { id: 'backlog',    title: 'Backlog',    emoji: '📋' },
+  { id: 'trending',  title: 'Trending',   emoji: '🔥' },
+  { id: 'scripting', title: 'Scripting',  emoji: '✍️' },
+  { id: 'production',title: 'Production', emoji: '🎬' },
+  { id: 'completed', title: 'Completed',  emoji: '✅' },
 ]
 
 export function KanbanBoard() {
@@ -63,21 +65,19 @@ export function KanbanBoard() {
 
     // Sort by position within each column
     Object.keys(grouped).forEach((key) => {
-      grouped[key as ProjectStatus].sort((a, b) => a.position - b.position)
+      grouped[key as ProjectStatus].sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
     })
 
     return grouped
   }, [projects])
 
-  const handleDragStart = (event: DragStartEvent) => {
-    // Could add active drag state here
+  const handleDragStart = (_event: DragStartEvent) => {
+    // Deselect any open panel when dragging
+    setSelectedProjectId(null)
   }
 
-  const handleDragOver = (event: DragOverEvent) => {
-    const { active, over } = event
-    if (!over) return
-
-    // Handle cross-column movement during drag
+  const handleDragOver = (_event: DragOverEvent) => {
+    // Visual feedback handled by DndKit internals
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -87,21 +87,19 @@ export function KanbanBoard() {
     const activeId = active.id as string
     const overId = over.id as string
 
-    // Find the active project
     const activeProject = projects.find((p) => p.id === activeId)
     if (!activeProject) return
 
-    // Determine new status and position
     let newStatus: ProjectStatus = activeProject.status
-    let newPosition = activeProject.position
+    let newPosition = activeProject.position ?? 0
 
-    // Check if dropped on a column
+    // Dropped on a column header
     const isColumn = COLUMNS.some((col) => col.id === overId)
     if (isColumn) {
       newStatus = overId as ProjectStatus
       newPosition = projectsByStatus[newStatus].length
     } else {
-      // Dropped on another project - find its column
+      // Dropped on another project card – find its column
       const overProject = projects.find((p) => p.id === overId)
       if (overProject) {
         newStatus = overProject.status
@@ -111,12 +109,11 @@ export function KanbanBoard() {
       }
     }
 
-    // Only update if something changed
     if (newStatus !== activeProject.status || newPosition !== activeProject.position) {
       try {
         await moveProject(activeId, newStatus, newPosition)
-        toast.success('Project moved')
-      } catch (error) {
+        toast.success(`Moved to ${newStatus}`)
+      } catch {
         toast.error('Failed to move project')
       }
     }
@@ -134,19 +131,20 @@ export function KanbanBoard() {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex h-full gap-4 overflow-x-auto p-4">
+      <div className="flex h-full gap-3 overflow-x-auto p-4">
         {COLUMNS.map((column) => (
           <KanbanColumn
             key={column.id}
             id={column.id}
             title={column.title}
+            emoji={column.emoji}
             projects={projectsByStatus[column.id]}
             onProjectClick={handleProjectClick}
           />
         ))}
       </div>
-      <DragOverlay>
-        {/* Could add drag preview here */}
+      <DragOverlay dropAnimation={null}>
+        {/* Transparent overlay; card itself shows dragging state */}
       </DragOverlay>
     </DndContext>
   )
