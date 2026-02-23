@@ -4,11 +4,12 @@ The web dashboard for **Facelessly**, an AI-powered faceless video generation an
 
 ## Features
 
-- 🎬 **Video Generation Wizard** — Multi-step flow to pick niche, style, and generate viral short-form videos
-- � **Content Calendar** — Visual calendar showing scheduled and posted content
-- � **Platform Connect** — OAuth integration for YouTube (TikTok & Instagram via upload-post.com)
-- 📊 **Dashboard** — Overview of pipelines, credits, and recent activity
+- 🎬 **Video Generation Wizard** — Multi-step flow: niche → style → connect → generate
+- 📅 **Content Calendar** — Monthly grid with per-day status indicators (posted, queued, retrying, failed, generating)
+- 🔗 **Platform Connect** — YouTube OAuth, TikTok & Instagram via upload-post.com
+- 📊 **Dashboard** — Kanban project management board
 - 💬 **AI Chat** — Conversational interface powered by the Agno agent backend
+- 💳 **Credits** — Credit balance display with tier-based limits
 - 🌙 **Dark Mode** — Theme support via `next-themes`
 
 ## Tech Stack
@@ -29,7 +30,7 @@ The web dashboard for **Facelessly**, an AI-powered faceless video generation an
 ### Prerequisites
 
 - **Node.js** ≥ 18
-- **npm** (or bun/pnpm)
+- **npm**
 - Backend API running on `http://localhost:8000` (see `../BE/README.md`)
 
 ### Install & Run
@@ -44,7 +45,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-> **Port conflict?** If port 3000 is in use, kill the existing process:
+> **Port conflict?** If port 3000 is already in use:
 > ```bash
 > lsof -ti:3000 | xargs kill -9
 > ```
@@ -66,23 +67,37 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 src/
 ├── app/
 │   ├── page.tsx          # Landing / Home
-│   ├── dashboard/        # Main dashboard
-│   ├── generate/         # Video generation wizard
-│   ├── calendar/         # Content calendar
+│   ├── dashboard/        # Kanban project board
+│   ├── generate/         # Video generation wizard (4 steps)
+│   ├── calendar/         # Content calendar with status chips
 │   ├── connect/          # Platform OAuth connections
 │   └── chat/             # AI chat interface
+├── api/                  # API routes (routes.ts)
 ├── components/           # Shared UI components (shadcn/ui)
-├── lib/                  # Utilities, API client, helpers
-└── stores/               # Zustand state management
+│   ├── ui/               # Base components (Button, Dialog, etc.)
+│   └── chat/             # Chat-specific components
+├── hooks/                # Custom hooks (streaming, chat actions)
+├── lib/                  # Utilities, API client
+├── store.ts              # Zustand global state
+└── types/                # TypeScript types
 ```
 
 ## Environment Variables
 
-Create a `.env.local` file if needed:
+Create a `.env.local` file:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8000   # Backend API URL
 ```
+
+## User Flow
+
+1. **Landing** (`/`) → "Get Started" CTA
+2. **Generate Wizard** (`/generate`) → Niche → Style → Connect → Generate
+3. **Calendar** (`/calendar`) → View scheduled/posted content by date
+4. **Dashboard** (`/dashboard`) → Kanban project management
+5. **Connections** (`/connect`) → Platform management & schedule status
+6. **Chat** (`/chat`) → Direct AI agent interaction
 
 ## License
 

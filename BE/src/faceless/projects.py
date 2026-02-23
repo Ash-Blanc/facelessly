@@ -90,7 +90,7 @@ async def update_project(
     project_id: str, user_id: str, updates: dict[str, Any]
 ) -> dict[str, Any] | None:
     """Update project status/position/title."""
-    allowed = {"title", "status", "position", "selected_trend_id"}
+    allowed = {"title", "status", "position", "selected_trend_id", "niche", "style", "template"}
     updates = {k: v for k, v in updates.items() if k in allowed}
 
     if not updates:

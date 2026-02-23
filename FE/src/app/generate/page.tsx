@@ -204,9 +204,9 @@ export default function GeneratePage() {
         {currentStep === 'niche' && (
           <div className="space-y-6">
             <div className="text-center">
-              <h1 className="text-3xl font-bold">What's your niche?</h1>
+              <h1 className="text-3xl font-bold">What&apos;s your niche?</h1>
               <p className="mt-2 text-muted-foreground">
-                Pick a content category. We'll tailor everything to your audience.
+                Pick a content category. We&apos;ll tailor everything to your audience.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
